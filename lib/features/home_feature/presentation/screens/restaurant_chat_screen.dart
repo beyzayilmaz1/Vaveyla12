@@ -160,21 +160,12 @@ class _RestaurantChatScreenState extends State<RestaurantChatScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         titleSpacing: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.restaurantName,
-              style: typography.bodyLarge.copyWith(
-                fontWeight: FontWeight.w700,
-                color: colors.primaryTint2,
-              ),
-            ),
-            Text(
-              'Çevrimiçi',
-              style: typography.bodySmall.copyWith(color: colors.gray4),
-            ),
-          ],
+        title: Text(
+          widget.restaurantName,
+          style: typography.bodyLarge.copyWith(
+            fontWeight: FontWeight.w700,
+            color: colors.primaryTint2,
+          ),
         ),
       ),
       body: Column(
@@ -217,9 +208,10 @@ class _RestaurantChatScreenState extends State<RestaurantChatScreen> {
                           ),
                           padding: ChatBubbleTokens.padding,
                           decoration: BoxDecoration(
-                            color: isMine
-                                ? ChatBubbleTokens.outgoingFill
-                                : ChatBubbleTokens.incomingFill,
+                            color:
+                                isMine
+                                    ? ChatBubbleTokens.outgoingFill
+                                    : ChatBubbleTokens.incomingFill,
                             borderRadius: BorderRadius.circular(
                               ChatBubbleTokens.radius,
                             ),
@@ -253,41 +245,44 @@ class _RestaurantChatScreenState extends State<RestaurantChatScreen> {
                           ),
                         );
                         return Align(
-                          alignment: isMine
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
+                          alignment:
+                              isMine
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
                           child: Opacity(
                             opacity: isDeleting ? 0.55 : 1,
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 8),
-                              child: isMine
-                                  ? Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        bubble,
-                                        const SizedBox(width: 6),
-                                        IconButton(
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(
-                                            minWidth: 32,
-                                            minHeight: 32,
+                              child:
+                                  isMine
+                                      ? Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          bubble,
+                                          const SizedBox(width: 6),
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(
+                                              minWidth: 32,
+                                              minHeight: 32,
+                                            ),
+                                            splashRadius: 18,
+                                            onPressed:
+                                                isDeleting
+                                                    ? null
+                                                    : () =>
+                                                        _deleteMessage(message),
+                                            icon: Icon(
+                                              Icons.delete_outline_rounded,
+                                              size: 17,
+                                              color: colors.error,
+                                            ),
                                           ),
-                                          splashRadius: 18,
-                                          onPressed: isDeleting
-                                              ? null
-                                              : () =>
-                                                  _deleteMessage(message),
-                                          icon: Icon(
-                                            Icons.delete_outline_rounded,
-                                            size: 17,
-                                            color: colors.error,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : bubble,
+                                        ],
+                                      )
+                                      : bubble,
                             ),
                           ),
                         );

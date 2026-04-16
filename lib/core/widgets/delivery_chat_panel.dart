@@ -24,7 +24,8 @@ class DeliveryChatPanel extends StatefulWidget {
 
   final String orderId;
   final String title;
-  /// Pastane sohbetiyle aynı üst satır (örn. Çevrimiçi). Boşsa altta sipariş no gösterilir.
+
+  /// Alt sayfa başlığı altındaki ikinci satır. Boşsa sipariş numarası gösterilir.
   final String? subtitle;
   final DeliveryChatService? deliveryChatService;
 
@@ -51,7 +52,8 @@ class _DeliveryChatPanelState extends State<DeliveryChatPanel> {
   void initState() {
     super.initState();
     _service =
-        widget.deliveryChatService ?? DeliveryChatService(authService: AuthService());
+        widget.deliveryChatService ??
+        DeliveryChatService(authService: AuthService());
     _load();
     _pollTimer = Timer.periodic(const Duration(seconds: 12), (_) {
       _load(silent: true);
@@ -237,9 +239,9 @@ class _DeliveryChatPanelState extends State<DeliveryChatPanel> {
       if (mounted) await _load(silent: true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -271,9 +273,9 @@ class _DeliveryChatPanelState extends State<DeliveryChatPanel> {
       await _load(silent: true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -345,7 +347,10 @@ class _DeliveryChatPanelState extends State<DeliveryChatPanel> {
               color: colors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Icon(Icons.edit, size: 18, color: colors.primary),
@@ -375,120 +380,129 @@ class _DeliveryChatPanelState extends State<DeliveryChatPanel> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: _loading && _messages.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      itemCount: _messages.length,
-                      itemBuilder: (context, index) {
-                        final m = _messages[index];
-                        final mine =
-                            myId.isNotEmpty &&
-                            m.senderUserId.toLowerCase() == myId.toLowerCase();
-                        final timeStyle = typography.bodySmall.copyWith(
-                          color: colors.gray4,
-                          fontSize: 10,
-                          height: 1.2,
-                        );
-                        final bubble = Container(
-                          constraints: BoxConstraints(
-                            maxWidth: ChatBubbleTokens.maxWidth(context),
-                          ),
-                          padding: ChatBubbleTokens.padding,
-                          decoration: BoxDecoration(
-                            color: mine
-                                ? ChatBubbleTokens.outgoingFill
-                                : ChatBubbleTokens.incomingFill,
-                            borderRadius: BorderRadius.circular(
-                              ChatBubbleTokens.radius,
+              child:
+                  _loading && _messages.isEmpty
+                      ? const Center(child: CircularProgressIndicator())
+                      : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        itemCount: _messages.length,
+                        itemBuilder: (context, index) {
+                          final m = _messages[index];
+                          final mine =
+                              myId.isNotEmpty &&
+                              m.senderUserId.toLowerCase() ==
+                                  myId.toLowerCase();
+                          final timeStyle = typography.bodySmall.copyWith(
+                            color: colors.gray4,
+                            fontSize: 10,
+                            height: 1.2,
+                          );
+                          final bubble = Container(
+                            constraints: BoxConstraints(
+                              maxWidth: ChatBubbleTokens.maxWidth(context),
                             ),
-                          ),
-                          child: IntrinsicWidth(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  m.message,
-                                  style: typography.bodySmall.copyWith(
-                                    height: 1.2,
-                                    color: colors.black,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                if (m.editedAtUtc != null) ...[
-                                  const SizedBox(height: 2),
+                            padding: ChatBubbleTokens.padding,
+                            decoration: BoxDecoration(
+                              color:
+                                  mine
+                                      ? ChatBubbleTokens.outgoingFill
+                                      : ChatBubbleTokens.incomingFill,
+                              borderRadius: BorderRadius.circular(
+                                ChatBubbleTokens.radius,
+                              ),
+                            ),
+                            child: IntrinsicWidth(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
                                   Text(
-                                    'düzenlendi',
+                                    m.message,
                                     style: typography.bodySmall.copyWith(
-                                      color: colors.gray4,
-                                      fontSize: 9,
-                                      fontStyle: FontStyle.italic,
                                       height: 1.2,
+                                      color: colors.black,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 13,
                                     ),
                                   ),
-                                ],
-                                const SizedBox(height: 2),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
+                                  if (m.editedAtUtc != null) ...[
+                                    const SizedBox(height: 2),
                                     Text(
-                                      _formatTime(m.createdAtUtc),
-                                      style: timeStyle,
+                                      'düzenlendi',
+                                      style: typography.bodySmall.copyWith(
+                                        color: colors.gray4,
+                                        fontSize: 9,
+                                        fontStyle: FontStyle.italic,
+                                        height: 1.2,
+                                      ),
                                     ),
                                   ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-
-                        return Align(
-                          alignment: mine
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: mine
-                                ? Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      GestureDetector(
-                                        onLongPress: () =>
-                                            _onMessageLongPress(context, m),
-                                        child: bubble,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      IconButton(
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(
-                                          minWidth: 32,
-                                          minHeight: 32,
-                                        ),
-                                        splashRadius: 18,
-                                        onPressed: _sending
-                                            ? null
-                                            : () => _confirmDelete(m),
-                                        icon: Icon(
-                                          Icons.delete_outline_rounded,
-                                          size: 17,
-                                          color: colors.error,
-                                        ),
+                                      Text(
+                                        _formatTime(m.createdAtUtc),
+                                        style: timeStyle,
                                       ),
                                     ],
-                                  )
-                                : bubble,
-                          ),
-                        );
-                      },
-                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          return Align(
+                            alignment:
+                                mine
+                                    ? Alignment.centerRight
+                                    : Alignment.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child:
+                                  mine
+                                      ? Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          GestureDetector(
+                                            onLongPress:
+                                                () => _onMessageLongPress(
+                                                  context,
+                                                  m,
+                                                ),
+                                            child: bubble,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(
+                                              minWidth: 32,
+                                              minHeight: 32,
+                                            ),
+                                            splashRadius: 18,
+                                            onPressed:
+                                                _sending
+                                                    ? null
+                                                    : () => _confirmDelete(m),
+                                            icon: Icon(
+                                              Icons.delete_outline_rounded,
+                                              size: 17,
+                                              color: colors.error,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                      : bubble,
+                            ),
+                          );
+                        },
+                      ),
             ),
           ),
         ),
@@ -522,12 +536,13 @@ class _DeliveryChatPanelState extends State<DeliveryChatPanel> {
                   onSubmitted: (_) => _send(),
                   style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
-                    hintText: _editingMessageId != null
-                        ? 'Mesajı güncelleyin…'
-                        : 'Mesaj yaz...',
-                    hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colors.gray4,
-                        ),
+                    hintText:
+                        _editingMessageId != null
+                            ? 'Mesajı güncelleyin…'
+                            : 'Mesaj yaz...',
+                    hintStyle: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: colors.gray4),
                     filled: true,
                     fillColor: colors.secondaryShade1,
                     contentPadding: const EdgeInsets.symmetric(
@@ -557,21 +572,22 @@ class _DeliveryChatPanelState extends State<DeliveryChatPanel> {
                 ),
                 child: IconButton(
                   onPressed: _sending ? null : _send,
-                  icon: _sending
-                      ? SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
+                  icon:
+                      _sending
+                          ? SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: colors.white,
+                            ),
+                          )
+                          : Icon(
+                            _editingMessageId != null
+                                ? Icons.check_rounded
+                                : Icons.send_rounded,
                             color: colors.white,
                           ),
-                        )
-                      : Icon(
-                          _editingMessageId != null
-                              ? Icons.check_rounded
-                              : Icons.send_rounded,
-                          color: colors.white,
-                        ),
                 ),
               ),
             ],

@@ -31,7 +31,8 @@ class CustomerOrderTrackingScreen extends StatefulWidget {
 
 class _CustomerOrderTrackingScreenState
     extends State<CustomerOrderTrackingScreen> {
-  final TrackingRealtimeService _trackingService = TrackingRealtimeService.shared;
+  final TrackingRealtimeService _trackingService =
+      TrackingRealtimeService.shared;
   final GoogleGeocodingService _geocodingService = GoogleGeocodingService();
   final RouteService _routeService = RouteService();
   final MapController _mapController = MapController();
@@ -47,6 +48,7 @@ class _CustomerOrderTrackingScreenState
   String? _snapshotCustomerPhone;
   CourierDetailsModel? _courier;
   bool _trackingActive = false;
+
   /// Yalnızca [inTransit] iken SignalR aboneliği (canlı konum / takip bayrağı).
   bool _liveSignalRSubscribed = false;
   bool _trackingHandlersWired = false;
@@ -215,8 +217,7 @@ class _CustomerOrderTrackingScreenState
       segment = segment.substring(0, slash).trim();
     }
     final words = segment.split(RegExp(r'\s+'));
-    if (words.length >= 2 &&
-        segment.toLowerCase().contains('merkez')) {
+    if (words.length >= 2 && segment.toLowerCase().contains('merkez')) {
       return words.last;
     }
     return segment.isEmpty ? null : segment;
@@ -284,10 +285,14 @@ class _CustomerOrderTrackingScreenState
 
   /// Müşteri haritasında kurye ikonu yok; yalnızca metin durumu için konum bilgisi tutulur.
   bool _hasTrustworthyCourierFix(CustomerOrderModel order, LatLng? customerPt) {
-    final raw = _animatedCourierPoint ?? _safeLatLng(order.courierLat, order.courierLng);
+    final raw =
+        _animatedCourierPoint ??
+        _safeLatLng(order.courierLat, order.courierLng);
     if (raw == null) return false;
     final ts = order.courierLocationUpdatedAtUtc ?? _lastCourierPushUtc;
-    if (customerPt != null && ts == null && _distanceCalc(raw, customerPt) < 35) {
+    if (customerPt != null &&
+        ts == null &&
+        _distanceCalc(raw, customerPt) < 35) {
       return false;
     }
     return true;
@@ -414,8 +419,14 @@ class _CustomerOrderTrackingScreenState
         setState(() {
           _trackingActive = snapshot.isTrackingActive;
           _courier = snapshot.courier;
-          final snapCust = _safeLatLng(snapshot.customerLat, snapshot.customerLng);
-          final snapCourier = _safeLatLng(snapshot.courierLat, snapshot.courierLng);
+          final snapCust = _safeLatLng(
+            snapshot.customerLat,
+            snapshot.customerLng,
+          );
+          final snapCourier = _safeLatLng(
+            snapshot.courierLat,
+            snapshot.courierLng,
+          );
           if (_courierRawIsTrustworthy(
             snapCourier,
             snapCust,
@@ -461,8 +472,14 @@ class _CustomerOrderTrackingScreenState
           if (allowLive) {
             _trackingActive = snapshot.isTrackingActive;
             _courier = snapshot.courier;
-            final snapCust = _safeLatLng(snapshot.customerLat, snapshot.customerLng);
-            final snapCourier = _safeLatLng(snapshot.courierLat, snapshot.courierLng);
+            final snapCust = _safeLatLng(
+              snapshot.customerLat,
+              snapshot.customerLng,
+            );
+            final snapCourier = _safeLatLng(
+              snapshot.courierLat,
+              snapshot.courierLng,
+            );
             if (_courierRawIsTrustworthy(
               snapCourier,
               snapCust,
@@ -530,8 +547,7 @@ class _CustomerOrderTrackingScreenState
     }
     _catalogHydrateAttemptedForOrderId = order.id;
     try {
-      final products =
-          await ProductsService().getProducts(restaurantId: rid);
+      final products = await ProductsService().getProducts(restaurantId: rid);
       if (!mounted || products.isEmpty) return;
       final p = products.first;
       setState(() {
@@ -551,9 +567,7 @@ class _CustomerOrderTrackingScreenState
 
   Future<void> _geocodeRestaurantIfNeeded(String? address) async {
     final addr = address?.trim() ?? '';
-    if (addr.isEmpty ||
-        _geocodedRestaurant != null ||
-        _isGeocodingRestaurant) {
+    if (addr.isEmpty || _geocodedRestaurant != null || _isGeocodingRestaurant) {
       return;
     }
     _isGeocodingRestaurant = true;
@@ -604,7 +618,6 @@ class _CustomerOrderTrackingScreenState
             child: DeliveryChatPanel(
               orderId: widget.orderId,
               title: title,
-              subtitle: 'Çevrimiçi',
             ),
           ),
         );
@@ -642,340 +655,294 @@ class _CustomerOrderTrackingScreenState
         }
       },
       child: AppScaffold(
-      extendBodyBehindAppBar: true,
-      safeAreaTop: false,
-      safeAreaLeft: false,
-      safeAreaRight: false,
-      safeAreaBottom: false,
-      appBar: const GeneralAppBar(title: 'Teslimat rotası', showBackIcon: true),
-      padding: EdgeInsets.zero,
-      body: BlocBuilder<CustomerOrdersCubit, CustomerOrdersState>(
-        builder: (context, state) {
-          final order = _findOrder(state.orders, widget.orderId);
-          if (order == null) {
-            return const Center(child: Text('Sipariş bulunamadı.'));
-          }
+        extendBodyBehindAppBar: true,
+        safeAreaTop: false,
+        safeAreaLeft: false,
+        safeAreaRight: false,
+        safeAreaBottom: false,
+        appBar: const GeneralAppBar(
+          title: 'Teslimat rotası',
+          showBackIcon: true,
+        ),
+        padding: EdgeInsets.zero,
+        body: BlocBuilder<CustomerOrdersCubit, CustomerOrdersState>(
+          builder: (context, state) {
+            final order = _findOrder(state.orders, widget.orderId);
+            if (order == null) {
+              return const Center(child: Text('Sipariş bulunamadı.'));
+            }
 
-          final mq = MediaQuery.of(context);
-          const footerTrackingH = 64.0;
-          final scrollMaxH = mq.size.height * 0.34;
-          final bottomPanelH =
-              scrollMaxH + footerTrackingH + mq.padding.bottom;
-          final controlsBottom = bottomPanelH + 16;
+            final mq = MediaQuery.of(context);
+            const footerTrackingH = 64.0;
+            final scrollMaxH = mq.size.height * 0.34;
+            final bottomPanelH =
+                scrollMaxH + footerTrackingH + mq.padding.bottom;
+            final controlsBottom = bottomPanelH + 16;
 
-          final customerPoint = _customerPointFromOrder(order);
-          final restaurantPoint = _restaurantPointFromOrder(order);
-          final deliveryAddrLine = _resolvedDeliveryAddressLine(order);
-          final liveHubEligible = _isLiveHubEligible(order);
-          final customerLiveTracking = liveHubEligible && _trackingActive;
+            final customerPoint = _customerPointFromOrder(order);
+            final restaurantPoint = _restaurantPointFromOrder(order);
+            final deliveryAddrLine = _resolvedDeliveryAddressLine(order);
+            final liveHubEligible = _isLiveHubEligible(order);
+            final customerLiveTracking = liveHubEligible && _trackingActive;
 
-          _geocodeCustomerAddressIfNeeded(order);
-          unawaited(_maybeHydrateRestaurantFromCatalog(order));
-          final restGeoQuery = _restaurantGeocodeQuery(order);
-          // Rota uçları kurye ekranıyla aynı olsun: API koordinatı yoksa adres geokodu şart;
-          // yalnızca katalog pin’i varken geokod atlanmasın.
-          if (_restaurantPointForRoute(order) == null && restGeoQuery != null) {
-            unawaited(_geocodeRestaurantIfNeeded(restGeoQuery));
-          }
+            _geocodeCustomerAddressIfNeeded(order);
+            unawaited(_maybeHydrateRestaurantFromCatalog(order));
+            final restGeoQuery = _restaurantGeocodeQuery(order);
+            // Rota uçları kurye ekranıyla aynı olsun: API koordinatı yoksa adres geokodu şart;
+            // yalnızca katalog pin’i varken geokod atlanmasın.
+            if (_restaurantPointForRoute(order) == null &&
+                restGeoQuery != null) {
+              unawaited(_geocodeRestaurantIfNeeded(restGeoQuery));
+            }
 
-          final routeRestaurantPoint = _restaurantPointForRoute(order);
+            final routeRestaurantPoint = _restaurantPointForRoute(order);
 
-          final routeKey =
-              _routeEndpointsKey(routeRestaurantPoint, customerPoint);
-          final routeMatchesFocus =
-              _fullRouteResult != null &&
-              _routeCacheKey != null &&
-              routeKey != null &&
-              _routeCacheKey == routeKey;
-
-          var routePoints = <LatLng>[];
-          if (routeMatchesFocus) {
-            routePoints = _sanitizePolylinePoints(
-              _fullRouteResult?.polylinePoints ?? const <LatLng>[],
+            final routeKey = _routeEndpointsKey(
+              routeRestaurantPoint,
+              customerPoint,
             );
-          }
-          if (routePoints.isEmpty &&
-              routeRestaurantPoint != null &&
-              customerPoint != null &&
-              _latLngDistinct(routeRestaurantPoint, customerPoint)) {
-            routePoints = [routeRestaurantPoint, customerPoint];
-          }
+            final routeMatchesFocus =
+                _fullRouteResult != null &&
+                _routeCacheKey != null &&
+                routeKey != null &&
+                _routeCacheKey == routeKey;
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-            final from = _restaurantPointForRoute(order);
-            final to = customerPoint;
-            if (from != null && to != null) {
-              unawaited(_fetchFullRoute(from, to));
+            var routePoints = <LatLng>[];
+            if (routeMatchesFocus) {
+              routePoints = _sanitizePolylinePoints(
+                _fullRouteResult?.polylinePoints ?? const <LatLng>[],
+              );
             }
-          });
+            if (routePoints.isEmpty &&
+                routeRestaurantPoint != null &&
+                customerPoint != null &&
+                _latLngDistinct(routeRestaurantPoint, customerPoint)) {
+              routePoints = [routeRestaurantPoint, customerPoint];
+            }
 
-          final initialCenter = _mapCenter(customerPoint, restaurantPoint);
-
-          final restaurantMarkerPoint = _restaurantMarkerOnMap(
-            restaurantPoint,
-            customerPoint,
-          );
-
-          /// Kurye paneliyle aynı: rozet yalnızca canlı takip + OSRM pastane→müşteri hazırken.
-          final showRouteChip =
-              customerLiveTracking &&
-              routeMatchesFocus &&
-              _fullRouteResult?.totalDistanceKm != null &&
-              _fullRouteResult?.totalDurationMinutes != null;
-
-          final trackingSubtitle = () {
-            if (!_isReady) return 'Bağlantı kuruluyor…';
-            if (!liveHubEligible) {
-              if (order.status == CustomerOrderStatus.assigned) {
-                return 'Tahmini süre ve canlı konum, kurye pastaneden çıkıp yola başladığında gösterilir.';
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              final from = _restaurantPointForRoute(order);
+              final to = customerPoint;
+              if (from != null && to != null) {
+                unawaited(_fetchFullRoute(from, to));
               }
-              return 'Tahmini süre ve canlı konum, sipariş yola çıktığında gösterilir.';
-            }
-            if (!_trackingActive) {
-              return 'Kurye takibi, kurye uygulamasında takip başlatılınca açılır.';
-            }
-            if (!_hasTrustworthyCourierFix(order, customerPoint)) {
-              return 'Kurye konumu güncelleniyor…';
-            }
-            final u = order.courierLocationUpdatedAtUtc ?? _lastCourierPushUtc;
-            if (u != null) {
-              final local = u.toLocal();
-              return 'Son konum: ${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-            }
-            return 'Canlı konum alınıyor';
-          }();
+            });
 
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned.fill(
-                child: FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: initialCenter,
-                    initialZoom: 14.2,
-                    interactionOptions: const InteractionOptions(
-                      flags:
-                          InteractiveFlag.pinchZoom |
-                          InteractiveFlag.drag |
-                          InteractiveFlag.doubleTapZoom |
-                          InteractiveFlag.flingAnimation,
-                    ),
-                    onMapReady: () {
-                      final from = _restaurantPointForRoute(order);
-                      final to = customerPoint;
-                      if (from != null && to != null) {
-                        _fitMapToRoute(from, to);
-                      }
-                    },
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      subdomains: const ['a', 'b', 'c'],
-                      userAgentPackageName:
-                          'com.sweet.shop.flutter_sweet_shop_app_ui',
-                    ),
-                    if (routePoints.isNotEmpty) ...[
-                      PolylineLayer(
-                        polylines: [
-                          Polyline(
-                            points: routePoints,
-                            strokeWidth: 12,
-                            color: Colors.white.withValues(alpha: 0.95),
-                          ),
-                        ],
+            final initialCenter = _mapCenter(customerPoint, restaurantPoint);
+
+            final restaurantMarkerPoint = _restaurantMarkerOnMap(
+              restaurantPoint,
+              customerPoint,
+            );
+
+            /// Kurye paneliyle aynı: rozet yalnızca canlı takip + OSRM pastane→müşteri hazırken.
+            final showRouteChip =
+                customerLiveTracking &&
+                routeMatchesFocus &&
+                _fullRouteResult?.totalDistanceKm != null &&
+                _fullRouteResult?.totalDurationMinutes != null;
+
+            final trackingSubtitle = () {
+              if (!_isReady) return 'Bağlantı kuruluyor…';
+              if (!liveHubEligible) {
+                if (order.status == CustomerOrderStatus.assigned) {
+                  return 'Tahmini süre ve canlı konum, kurye pastaneden çıkıp yola başladığında gösterilir.';
+                }
+                return 'Tahmini süre ve canlı konum, sipariş yola çıktığında gösterilir.';
+              }
+              if (!_trackingActive) {
+                return 'Kurye takibi, kurye uygulamasında takip başlatılınca açılır.';
+              }
+              if (!_hasTrustworthyCourierFix(order, customerPoint)) {
+                return 'Kurye konumu güncelleniyor…';
+              }
+              final u =
+                  order.courierLocationUpdatedAtUtc ?? _lastCourierPushUtc;
+              if (u != null) {
+                final local = u.toLocal();
+                return 'Son konum: ${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+              }
+              return 'Canlı konum alınıyor';
+            }();
+
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned.fill(
+                  child: FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter: initialCenter,
+                      initialZoom: 14.2,
+                      interactionOptions: const InteractionOptions(
+                        flags:
+                            InteractiveFlag.pinchZoom |
+                            InteractiveFlag.drag |
+                            InteractiveFlag.doubleTapZoom |
+                            InteractiveFlag.flingAnimation,
                       ),
-                      PolylineLayer(
-                        polylines: [
-                          Polyline(
-                            points: routePoints,
-                            strokeWidth: 5,
-                            color: _navRouteBlue,
-                          ),
+                      onMapReady: () {
+                        final from = _restaurantPointForRoute(order);
+                        final to = customerPoint;
+                        if (from != null && to != null) {
+                          _fitMapToRoute(from, to);
+                        }
+                      },
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        subdomains: const ['a', 'b', 'c'],
+                        userAgentPackageName:
+                            'com.sweet.shop.flutter_sweet_shop_app_ui',
+                      ),
+                      if (routePoints.isNotEmpty) ...[
+                        PolylineLayer(
+                          polylines: [
+                            Polyline(
+                              points: routePoints,
+                              strokeWidth: 12,
+                              color: Colors.white.withValues(alpha: 0.95),
+                            ),
+                          ],
+                        ),
+                        PolylineLayer(
+                          polylines: [
+                            Polyline(
+                              points: routePoints,
+                              strokeWidth: 5,
+                              color: _navRouteBlue,
+                            ),
+                          ],
+                        ),
+                      ],
+                      MarkerLayer(
+                        markers: [
+                          if (customerPoint != null)
+                            Marker(
+                              point: customerPoint,
+                              width: 44,
+                              height: 44,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap:
+                                    () => setState(
+                                      () => _showLocationCard = true,
+                                    ),
+                                child: Icon(
+                                  Icons.location_on,
+                                  color: colors.error,
+                                  size: 40,
+                                ),
+                              ),
+                            ),
+                          if (restaurantMarkerPoint != null)
+                            Marker(
+                              point: restaurantMarkerPoint,
+                              width: 48,
+                              height: 48,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap:
+                                    () => setState(
+                                      () => _showLocationCard = true,
+                                    ),
+                                child: Icon(
+                                  Icons.store_mall_directory_rounded,
+                                  color: Colors.deepOrange.shade700,
+                                  size: 40,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ],
-                    MarkerLayer(
-                      markers: [
-                        if (customerPoint != null)
-                          Marker(
-                            point: customerPoint,
-                            width: 44,
-                            height: 44,
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap:
-                                  () => setState(() => _showLocationCard = true),
-                              child: Icon(
-                                Icons.location_on,
-                                color: colors.error,
-                                size: 40,
-                              ),
-                            ),
-                          ),
-                        if (restaurantMarkerPoint != null)
-                          Marker(
-                            point: restaurantMarkerPoint,
-                            width: 48,
-                            height: 48,
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap:
-                                  () => setState(() => _showLocationCard = true),
-                              child: Icon(
-                                Icons.store_mall_directory_rounded,
-                                color: Colors.deepOrange.shade700,
-                                size: 40,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              if (_showLocationCard || showRouteChip)
-                Positioned(
-                  left: 72,
-                  right: 14,
-                  top: mq.padding.top + 76,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_showLocationCard)
-                        Material(
-                          elevation: 6,
-                          shadowColor: Colors.black26,
-                          borderRadius: BorderRadius.circular(16),
-                          color: colors.white.withValues(alpha: 0.96),
-                          clipBehavior: Clip.antiAlias,
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxHeight: mq.size.height * 0.42,
-                                ),
-                                child: SingleChildScrollView(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    14,
-                                    44,
-                                    14,
+                if (_showLocationCard || showRouteChip)
+                  Positioned(
+                    left: 72,
+                    right: 14,
+                    top: mq.padding.top + 76,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_showLocationCard)
+                          Material(
+                            elevation: 6,
+                            shadowColor: Colors.black26,
+                            borderRadius: BorderRadius.circular(16),
+                            color: colors.white.withValues(alpha: 0.96),
+                            clipBehavior: Clip.antiAlias,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight: mq.size.height * 0.42,
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Müşteri · teslimat',
-                                        style: typography.labelSmall.copyWith(
-                                          color: colors.gray4,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        _customerNameLine(order),
-                                        style: typography.titleSmall.copyWith(
-                                          fontWeight: FontWeight.w800,
-                                          color: colors.black,
-                                          height: 1.25,
-                                        ),
-                                      ),
-                                      if (_customerPhoneLine(order) != null) ...[
-                                        const SizedBox(height: 6),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                top: 2,
-                                              ),
-                                              child: Icon(
-                                                Icons.phone_rounded,
-                                                size: 16,
-                                                color: colors.primary,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Expanded(
-                                              child: Text(
-                                                _customerPhoneLine(order)!,
-                                                style: typography.bodySmall
-                                                    .copyWith(
-                                                      color: colors.gray4,
-                                                      height: 1.4,
-                                                    ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 2,
-                                            ),
-                                            child: Icon(
-                                              Icons.location_on_rounded,
-                                              size: 18,
-                                              color: colors.error,
-                                            ),
+                                  child: SingleChildScrollView(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      14,
+                                      44,
+                                      14,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Müşteri · teslimat',
+                                          style: typography.labelSmall.copyWith(
+                                            color: colors.gray4,
+                                            fontWeight: FontWeight.w600,
                                           ),
-                                          const SizedBox(width: 6),
-                                          Expanded(
-                                            child: Text(
-                                              deliveryAddrLine ??
-                                                  'Adres yükleniyor…',
-                                              style: typography.bodySmall
-                                                  .copyWith(
-                                                    color: colors.gray4,
-                                                    height: 1.45,
-                                                  ),
-                                            ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          _customerNameLine(order),
+                                          style: typography.titleSmall.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            color: colors.black,
+                                            height: 1.25,
+                                          ),
+                                        ),
+                                        if (_customerPhoneLine(order) !=
+                                            null) ...[
+                                          const SizedBox(height: 6),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 2,
+                                                ),
+                                                child: Icon(
+                                                  Icons.phone_rounded,
+                                                  size: 16,
+                                                  color: colors.primary,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Expanded(
+                                                child: Text(
+                                                  _customerPhoneLine(order)!,
+                                                  style: typography.bodySmall
+                                                      .copyWith(
+                                                        color: colors.gray4,
+                                                        height: 1.4,
+                                                      ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 14,
-                                        ),
-                                        child: Divider(
-                                          height: 1,
-                                          color: colors.gray.withValues(
-                                            alpha: 0.25,
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        'Pastane · ürün alımı',
-                                        style: typography.labelSmall.copyWith(
-                                          color: colors.gray4,
-                                          fontWeight: FontWeight.w600,
-                                          height: 1.35,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        _restaurantTitleLine(order),
-                                        style: typography.bodyMedium.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.35,
-                                        ),
-                                      ),
-                                      if (_restaurantStreetOnly(order) !=
-                                          null) ...[
                                         const SizedBox(height: 8),
                                         Row(
                                           crossAxisAlignment:
@@ -986,16 +953,16 @@ class _CustomerOrderTrackingScreenState
                                                 top: 2,
                                               ),
                                               child: Icon(
-                                                Icons
-                                                    .store_mall_directory_rounded,
+                                                Icons.location_on_rounded,
                                                 size: 18,
-                                                color: colors.primary,
+                                                color: colors.error,
                                               ),
                                             ),
                                             const SizedBox(width: 6),
                                             Expanded(
                                               child: Text(
-                                                _restaurantStreetOnly(order)!,
+                                                deliveryAddrLine ??
+                                                    'Adres yükleniyor…',
                                                 style: typography.bodySmall
                                                     .copyWith(
                                                       color: colors.gray4,
@@ -1005,400 +972,465 @@ class _CustomerOrderTrackingScreenState
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 4,
-                                right: 2,
-                                child: IconButton(
-                                  visualDensity: VisualDensity.compact,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 40,
-                                    minHeight: 40,
-                                  ),
-                                  onPressed:
-                                      () => setState(
-                                        () => _showLocationCard = false,
-                                      ),
-                                  icon: Icon(Icons.close, color: colors.gray4),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      if (showRouteChip) ...[
-                        if (_showLocationCard) const SizedBox(height: 10),
-                        Center(
-                          child: Material(
-                            elevation: 5,
-                            shadowColor: Colors.black26,
-                            borderRadius: BorderRadius.circular(10),
-                            color: colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 8,
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.directions_car_rounded,
-                                        size: 20,
-                                        color: _navRouteBlue,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '${_fullRouteResult!.totalDurationMinutes} dk · ${_fullRouteResult!.totalDistanceKm!.toStringAsFixed(1)} km',
-                                        style: typography.labelLarge.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: colors.black,
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 14,
+                                          ),
+                                          child: Divider(
+                                            height: 1,
+                                            color: colors.gray.withValues(
+                                              alpha: 0.25,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 28),
-                                    child: Text(
-                                      'Pastane → müşteri (yol)',
-                                      style: typography.labelSmall.copyWith(
-                                        color: colors.gray4,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                        Text(
+                                          'Pastane · ürün alımı',
+                                          style: typography.labelSmall.copyWith(
+                                            color: colors.gray4,
+                                            fontWeight: FontWeight.w600,
+                                            height: 1.35,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          _restaurantTitleLine(order),
+                                          style: typography.bodyMedium.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            height: 1.35,
+                                          ),
+                                        ),
+                                        if (_restaurantStreetOnly(order) !=
+                                            null) ...[
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 2,
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .store_mall_directory_rounded,
+                                                  size: 18,
+                                                  color: colors.primary,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Expanded(
+                                                child: Text(
+                                                  _restaurantStreetOnly(order)!,
+                                                  style: typography.bodySmall
+                                                      .copyWith(
+                                                        color: colors.gray4,
+                                                        height: 1.45,
+                                                      ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              Positioned(
-                left: 14,
-                bottom: controlsBottom,
-                child: Material(
-                  color: colors.white,
-                  elevation: 8,
-                  shadowColor: Colors.black26,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          final from = _restaurantPointFromOrder(order);
-                          final to = customerPoint;
-                          if (from != null && to != null) {
-                            _fitMapToRoute(from, to);
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Icon(
-                            Icons.alt_route_rounded,
-                            color: colors.primary,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        height: 1,
-                        width: 40,
-                        color: colors.gray.withValues(alpha: 0.2),
-                      ),
-                      InkWell(
-                        onTap: () => _zoomBy(1),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Icon(
-                            Icons.add,
-                            color: colors.primary,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        height: 1,
-                        width: 40,
-                        color: colors.gray.withValues(alpha: 0.2),
-                      ),
-                      InkWell(
-                        onTap: () => _zoomBy(-1),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Icon(
-                            Icons.remove,
-                            color: colors.primary,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 14,
-                bottom: controlsBottom,
-                child: Material(
-                  color: colors.primary.withValues(alpha: 0.14),
-                  elevation: 8,
-                  shadowColor: Colors.black26,
-                  borderRadius: BorderRadius.circular(14),
-                  child: InkWell(
-                    onTap: _openDeliveryChat,
-                    borderRadius: BorderRadius.circular(14),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Icon(
-                        Icons.chat_bubble_rounded,
-                        color: colors.primary,
-                        size: 26,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Material(
-                  elevation: 16,
-                  shadowColor: Colors.black26,
-                  color: colors.white,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(22),
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ConstrainedBox(
-                        constraints: BoxConstraints(maxHeight: scrollMaxH),
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(
-                            Dimens.largePadding,
-                            Dimens.padding,
-                            Dimens.largePadding,
-                            8,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                'Teslimat için önce müşteri adresi, ürün alımı için pastane. Mavi çizgi pastane → müşteri yol rotasıdır; kırmızı pin müşteri, turuncu ikon pastane.',
-                                style: typography.bodySmall.copyWith(
-                                  color: colors.gray4,
-                                  height: 1.3,
                                 ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Adres kartını açıp kapatmak için kırmızı pin veya pastane ikonuna dokunabilirsiniz.',
-                                style: typography.bodySmall.copyWith(
-                                  color: colors.gray4,
-                                  height: 1.3,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              InkWell(
-                                onTap: () {
-                                  final from = _restaurantPointFromOrder(order);
-                                  final to = customerPoint;
-                                  if (from != null && to != null) {
-                                    _fitMapToRoute(from, to);
-                                  }
-                                },
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.gps_not_fixed,
-                                      size: 20,
+                                Positioned(
+                                  top: 4,
+                                  right: 2,
+                                  child: IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 40,
+                                      minHeight: 40,
+                                    ),
+                                    onPressed:
+                                        () => setState(
+                                          () => _showLocationCard = false,
+                                        ),
+                                    icon: Icon(
+                                      Icons.close,
                                       color: colors.gray4,
                                     ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (showRouteChip) ...[
+                          if (_showLocationCard) const SizedBox(height: 10),
+                          Center(
+                            child: Material(
+                              elevation: 5,
+                              shadowColor: Colors.black26,
+                              borderRadius: BorderRadius.circular(10),
+                              color: colors.white,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.directions_car_rounded,
+                                          size: 20,
+                                          color: _navRouteBlue,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '${_fullRouteResult!.totalDurationMinutes} dk · ${_fullRouteResult!.totalDistanceKm!.toStringAsFixed(1)} km',
+                                          style: typography.labelLarge.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: colors.black,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 28),
                                       child: Text(
-                                        'Rotaya göre harita (önerilen)',
-                                        style: typography.bodySmall.copyWith(
+                                        'Pastane → müşteri (yol)',
+                                        style: typography.labelSmall.copyWith(
+                                          color: colors.gray4,
+                                          fontSize: 11,
                                           fontWeight: FontWeight.w600,
-                                          color: colors.black,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                trackingSubtitle,
-                                style: typography.bodySmall.copyWith(
-                                  color: colors.gray4,
-                                  fontSize: 12,
-                                  height: 1.25,
-                                ),
-                              ),
-                              if (routeMatchesFocus &&
-                                  customerLiveTracking &&
-                                  _fullRouteResult!.totalDistanceKm != null &&
-                                  _fullRouteResult!.totalDurationMinutes !=
-                                      null) ...[
-                                const SizedBox(height: Dimens.padding),
-                                _CustomerDeliveryRouteEtaStrip(
-                                  km: _fullRouteResult!.totalDistanceKm!,
-                                  minutes:
-                                      _fullRouteResult!.totalDurationMinutes!,
-                                ),
-                              ],
-                              const SizedBox(height: Dimens.padding),
-                              Text(
-                                'Teslimat Adresi',
-                                style: typography.titleSmall.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: Dimens.padding),
-                              if (deliveryAddrLine != null)
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: colors.gray.withValues(alpha: 0.06),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: colors.error.withValues(
-                                        alpha: 0.55,
-                                      ),
-                                      width: 1.2,
-                                    ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                Positioned(
+                  left: 14,
+                  bottom: controlsBottom,
+                  child: Material(
+                    color: colors.white,
+                    elevation: 8,
+                    shadowColor: Colors.black26,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            final from = _restaurantPointFromOrder(order);
+                            final to = customerPoint;
+                            if (from != null && to != null) {
+                              _fitMapToRoute(from, to);
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Icon(
+                              Icons.alt_route_rounded,
+                              color: colors.primary,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: 1,
+                          width: 40,
+                          color: colors.gray.withValues(alpha: 0.2),
+                        ),
+                        InkWell(
+                          onTap: () => _zoomBy(1),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Icon(
+                              Icons.add,
+                              color: colors.primary,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: 1,
+                          width: 40,
+                          color: colors.gray.withValues(alpha: 0.2),
+                        ),
+                        InkWell(
+                          onTap: () => _zoomBy(-1),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Icon(
+                              Icons.remove,
+                              color: colors.primary,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 14,
+                  bottom: controlsBottom,
+                  child: Material(
+                    color: colors.primary.withValues(alpha: 0.14),
+                    elevation: 8,
+                    shadowColor: Colors.black26,
+                    borderRadius: BorderRadius.circular(14),
+                    child: InkWell(
+                      onTap: _openDeliveryChat,
+                      borderRadius: BorderRadius.circular(14),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Icon(
+                          Icons.chat_bubble_rounded,
+                          color: colors.primary,
+                          size: 26,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Material(
+                    elevation: 16,
+                    shadowColor: Colors.black26,
+                    color: colors.white,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(22),
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxHeight: scrollMaxH),
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(
+                              Dimens.largePadding,
+                              Dimens.padding,
+                              Dimens.largePadding,
+                              8,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  'Teslimat için önce müşteri adresi, ürün alımı için pastane. Mavi çizgi pastane → müşteri yol rotasıdır; kırmızı pin müşteri, turuncu ikon pastane.',
+                                  style: typography.bodySmall.copyWith(
+                                    color: colors.gray4,
+                                    height: 1.3,
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Adres kartını açıp kapatmak için kırmızı pin veya pastane ikonuna dokunabilirsiniz.',
+                                  style: typography.bodySmall.copyWith(
+                                    color: colors.gray4,
+                                    height: 1.3,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                InkWell(
+                                  onTap: () {
+                                    final from = _restaurantPointFromOrder(
+                                      order,
+                                    );
+                                    final to = customerPoint;
+                                    if (from != null && to != null) {
+                                      _fitMapToRoute(from, to);
+                                    }
+                                  },
+                                  child: Row(
                                     children: [
-                                      Text(
-                                        order.items,
-                                        style: typography.bodyMedium,
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
+                                      Icon(
+                                        Icons.gps_not_fixed,
+                                        size: 20,
+                                        color: colors.gray4,
                                       ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Icon(
-                                            Icons.location_on_rounded,
-                                            size: 18,
-                                            color: colors.error,
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Rotaya göre harita (önerilen)',
+                                          style: typography.bodySmall.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: colors.black,
                                           ),
-                                          const SizedBox(width: 6),
-                                          Expanded(
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  trackingSubtitle,
+                                  style: typography.bodySmall.copyWith(
+                                    color: colors.gray4,
+                                    fontSize: 12,
+                                    height: 1.25,
+                                  ),
+                                ),
+                                if (routeMatchesFocus &&
+                                    customerLiveTracking &&
+                                    _fullRouteResult!.totalDistanceKm != null &&
+                                    _fullRouteResult!.totalDurationMinutes !=
+                                        null) ...[
+                                  const SizedBox(height: Dimens.padding),
+                                  _CustomerDeliveryRouteEtaStrip(
+                                    km: _fullRouteResult!.totalDistanceKm!,
+                                    minutes:
+                                        _fullRouteResult!.totalDurationMinutes!,
+                                  ),
+                                ],
+                                const SizedBox(height: Dimens.padding),
+                                Text(
+                                  'Teslimat Adresi',
+                                  style: typography.titleSmall.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: Dimens.padding),
+                                if (deliveryAddrLine != null)
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: colors.gray.withValues(
+                                        alpha: 0.06,
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: colors.error.withValues(
+                                          alpha: 0.55,
+                                        ),
+                                        width: 1.2,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          order.items,
+                                          style: typography.bodyMedium,
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(
+                                              Icons.location_on_rounded,
+                                              size: 18,
+                                              color: colors.error,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                deliveryAddrLine,
+                                                style: typography.bodySmall
+                                                    .copyWith(
+                                                      color: colors.gray4,
+                                                      height: 1.35,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (order.time.isNotEmpty ||
+                                            order.date.isNotEmpty) ...[
+                                          const SizedBox(height: 8),
+                                          Align(
+                                            alignment: Alignment.centerRight,
                                             child: Text(
-                                              deliveryAddrLine,
+                                              '${order.date} ${order.time}',
                                               style: typography.bodySmall
                                                   .copyWith(
                                                     color: colors.gray4,
-                                                    height: 1.35,
                                                   ),
                                             ),
                                           ),
                                         ],
-                                      ),
-                                      if (order.time.isNotEmpty ||
-                                          order.date.isNotEmpty) ...[
-                                        const SizedBox(height: 8),
-                                        Align(
-                                          alignment: Alignment.centerRight,
-                                          child: Text(
-                                            '${order.date} ${order.time}',
-                                            style: typography.bodySmall
-                                                .copyWith(
-                                                  color: colors.gray4,
-                                                ),
-                                          ),
-                                        ),
                                       ],
-                                    ],
+                                    ),
+                                  ),
+                                if (customerPoint == null) ...[
+                                  const SizedBox(height: Dimens.padding),
+                                  Text(
+                                    'Teslimat konumu netleştiriliyor…',
+                                    style: typography.bodySmall.copyWith(
+                                      color: colors.gray4,
+                                    ),
+                                  ),
+                                ],
+                                if (_courier != null) ...[
+                                  const SizedBox(height: Dimens.padding),
+                                  _CourierRow(courier: _courier!),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                        const Divider(height: 1),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            16,
+                            10,
+                            16,
+                            10 + mq.padding.bottom,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                customerLiveTracking
+                                    ? Icons.gps_fixed
+                                    : Icons.gps_not_fixed,
+                                color:
+                                    customerLiveTracking
+                                        ? colors.success
+                                        : colors.gray4,
+                                size: 26,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  customerLiveTracking
+                                      ? 'Canlı Konum Takibi Aktif'
+                                      : (!liveHubEligible
+                                          ? 'Canlı takip kurye yola çıkınca açılır'
+                                          : 'Kurye takibi bekleniyor'),
+                                  style: typography.titleSmall.copyWith(
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                              if (customerPoint == null) ...[
-                                const SizedBox(height: Dimens.padding),
-                                Text(
-                                  'Teslimat konumu netleştiriliyor…',
-                                  style: typography.bodySmall.copyWith(
-                                    color: colors.gray4,
-                                  ),
-                                ),
-                              ],
-                              if (_courier != null) ...[
-                                const SizedBox(height: Dimens.padding),
-                                _CourierRow(courier: _courier!),
-                              ],
+                              ),
                             ],
                           ),
                         ),
-                      ),
-                      const Divider(height: 1),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          16,
-                          10,
-                          16,
-                          10 + mq.padding.bottom,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              customerLiveTracking
-                                  ? Icons.gps_fixed
-                                  : Icons.gps_not_fixed,
-                              color:
-                                  customerLiveTracking
-                                      ? colors.success
-                                      : colors.gray4,
-                              size: 26,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                customerLiveTracking
-                                    ? 'Canlı Konum Takibi Aktif'
-                                    : (!liveHubEligible
-                                        ? 'Canlı takip kurye yola çıkınca açılır'
-                                        : 'Kurye takibi bekleniyor'),
-                                style: typography.titleSmall.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
-    ),
     );
   }
 

@@ -16,6 +16,7 @@ import 'package:flutter_sweet_shop_app_ui/features/courier_feature/presentation/
 import 'package:flutter_sweet_shop_app_ui/features/courier_feature/presentation/bloc/courier_orders_cubit.dart';
 import 'package:flutter_sweet_shop_app_ui/features/courier_feature/presentation/screens/courier_orders_screen.dart';
 import 'package:flutter_sweet_shop_app_ui/features/courier_feature/presentation/screens/courier_tracking_screen.dart';
+import 'package:flutter_sweet_shop_app_ui/features/courier_feature/presentation/screens/courier_chats_screen.dart';
 import 'package:flutter_sweet_shop_app_ui/features/courier_feature/presentation/screens/courier_settings_screen.dart';
 import 'package:flutter_sweet_shop_app_ui/features/courier_feature/presentation/screens/courier_earnings_screen.dart';
 import 'package:flutter_sweet_shop_app_ui/features/courier_feature/presentation/bloc/courier_location_cubit.dart';
@@ -36,16 +37,18 @@ class CourierDashboardScreen extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => CourierNavCubit()),
         BlocProvider(
-          create: (_) =>
-              CourierOrdersCubit(courierService, courierUserId)
-                ..loadOrders()
-                ..startPolling(),
+          create:
+              (_) =>
+                  CourierOrdersCubit(courierService, courierUserId)
+                    ..loadOrders()
+                    ..startPolling(),
         ),
         BlocProvider(
-          create: (_) => CourierLocationCubit(
-            courierService: courierService,
-            courierUserId: courierUserId,
-          ),
+          create:
+              (_) => CourierLocationCubit(
+                courierService: courierService,
+                courierUserId: courierUserId,
+              ),
         ),
         BlocProvider(create: (_) => CourierOrdersTabCubit()),
       ],
@@ -77,68 +80,82 @@ class _CourierDashboardScreen extends StatelessWidget {
             const _DashboardTab(),
             const CourierOrdersScreen(),
             const CourierTrackingScreen(),
+            const CourierChatsScreen(),
             const CourierSettingsScreen(),
           ];
           return AppScaffold(
             padding: EdgeInsets.zero,
             body: screens[selectedIndex],
-            bottomNavigationBar: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(32),
-                topRight: Radius.circular(32),
+            bottomNavigationBar: SafeArea(
+              top: false,
+              minimum: EdgeInsets.zero,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(32),
+                    topRight: Radius.circular(32),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      spreadRadius: 3,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.only(top: 6, left: 8, right: 8, bottom: 4),
+                child: NavigationBar(
+                  height: 72,
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: cubit.onItemTap,
+                  destinations: [
+                    NavigationDestination(
+                      icon: AppSvgViewer(Assets.icons.home2),
+                      selectedIcon: AppSvgViewer(
+                        Assets.icons.home2,
+                        color: colors.primary,
+                      ),
+                      label: 'Panel',
+                    ),
+                    NavigationDestination(
+                      icon: AppSvgViewer(Assets.icons.receipt),
+                      selectedIcon: AppSvgViewer(
+                        Assets.icons.receipt,
+                        color: colors.primary,
+                      ),
+                      label: 'Siparişler',
+                    ),
+                    NavigationDestination(
+                      icon: AppSvgViewer(Assets.icons.map1),
+                      selectedIcon: AppSvgViewer(
+                        Assets.icons.map1,
+                        color: colors.primary,
+                      ),
+                      label: 'Harita',
+                    ),
+                    NavigationDestination(
+                      icon: const Icon(Icons.chat_bubble_outline_rounded),
+                      selectedIcon: Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        color: colors.primary,
+                      ),
+                      label: 'Sohbet',
+                    ),
+                    NavigationDestination(
+                      icon: AppSvgViewer(Assets.icons.setting2),
+                      selectedIcon: AppSvgViewer(
+                        Assets.icons.setting2,
+                        color: colors.primary,
+                      ),
+                      label: 'Ayarlar',
+                    ),
+                  ],
+                ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  spreadRadius: 3,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
-                ),
-              ],
             ),
-            padding: const EdgeInsets.only(top: 8, left: 8, right: 8),
-            child: NavigationBar(
-              selectedIndex: selectedIndex,
-              onDestinationSelected: cubit.onItemTap,
-              destinations: [
-                NavigationDestination(
-                  icon: AppSvgViewer(Assets.icons.home2),
-                  selectedIcon: AppSvgViewer(
-                    Assets.icons.home2,
-                    color: colors.primary,
-                  ),
-                  label: 'Panel',
-                ),
-                NavigationDestination(
-                  icon: AppSvgViewer(Assets.icons.receipt),
-                  selectedIcon: AppSvgViewer(
-                    Assets.icons.receipt,
-                    color: colors.primary,
-                  ),
-                  label: 'Siparişler',
-                ),
-                NavigationDestination(
-                  icon: AppSvgViewer(Assets.icons.map1),
-                  selectedIcon: AppSvgViewer(
-                    Assets.icons.map1,
-                    color: colors.primary,
-                  ),
-                  label: 'Harita',
-                ),
-                NavigationDestination(
-                  icon: AppSvgViewer(Assets.icons.setting2),
-                  selectedIcon: AppSvgViewer(
-                    Assets.icons.setting2,
-                    color: colors.primary,
-                  ),
-                  label: 'Ayarlar',
-                ),
-              ],
-            ),
-          ),
-        );
+          );
         },
       ),
     );
@@ -154,21 +171,26 @@ class _DashboardTab extends StatelessWidget {
     final typography = context.theme.appTypography;
     return BlocBuilder<CourierOrdersCubit, List<CourierOrderModel>>(
       builder: (context, orders) {
-        final assigned = orders
-            .where(
-              (o) =>
-                  o.status == CourierOrderStatus.assigned && !o.courierDeclined,
-            )
-            .length;
-        final inTransit = orders
-            .where(
-              (o) =>
-                  o.status == CourierOrderStatus.pickedUp ||
-                  o.status == CourierOrderStatus.inTransit,
-            )
-            .length;
+        final assigned =
+            orders
+                .where(
+                  (o) =>
+                      o.status == CourierOrderStatus.assigned &&
+                      !o.courierDeclined,
+                )
+                .length;
+        final inTransit =
+            orders
+                .where(
+                  (o) =>
+                      o.status == CourierOrderStatus.pickedUp ||
+                      o.status == CourierOrderStatus.inTransit,
+                )
+                .length;
         final delivered =
-            orders.where((o) => o.status == CourierOrderStatus.delivered).length;
+            orders
+                .where((o) => o.status == CourierOrderStatus.delivered)
+                .length;
         final totalEarnings = orders
             .where((o) => o.status == CourierOrderStatus.delivered)
             .fold<int>(0, (sum, o) => sum + o.total);
@@ -224,10 +246,11 @@ class _DashboardTab extends StatelessWidget {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (_) => BlocProvider.value(
-                            value: context.read<CourierOrdersCubit>(),
-                            child: const CourierEarningsScreen(),
-                          ),
+                          builder:
+                              (_) => BlocProvider.value(
+                                value: context.read<CourierOrdersCubit>(),
+                                child: const CourierEarningsScreen(),
+                              ),
                         ),
                       );
                     },
@@ -252,16 +275,14 @@ class _DashboardTab extends StatelessWidget {
                 icon: Assets.icons.receipt,
                 title: 'Siparişleri Gör',
                 subtitle: 'Atanmış teslimatları listele',
-                onTap: () =>
-                    context.read<CourierNavCubit>().onItemTap(1),
+                onTap: () => context.read<CourierNavCubit>().onItemTap(1),
               ),
               const SizedBox(height: Dimens.largePadding),
               _QuickActionCard(
                 icon: Assets.icons.map1,
                 title: 'Canlı Takip',
                 subtitle: 'Haritada teslimat konumunu takip et',
-                onTap: () =>
-                    context.read<CourierNavCubit>().onItemTap(2),
+                onTap: () => context.read<CourierNavCubit>().onItemTap(2),
               ),
               const SizedBox(height: Dimens.largePadding),
               _QuickActionCard(
@@ -271,10 +292,11 @@ class _DashboardTab extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => BlocProvider.value(
-                        value: context.read<CourierOrdersCubit>(),
-                        child: const CourierEarningsScreen(),
-                      ),
+                      builder:
+                          (_) => BlocProvider.value(
+                            value: context.read<CourierOrdersCubit>(),
+                            child: const CourierEarningsScreen(),
+                          ),
                     ),
                   );
                 },
@@ -495,10 +517,11 @@ class _CampaignCarousel extends StatelessWidget {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => BlocProvider.value(
-                    value: context.read<CourierOrdersCubit>(),
-                    child: const CourierEarningsScreen(),
-                  ),
+                  builder:
+                      (_) => BlocProvider.value(
+                        value: context.read<CourierOrdersCubit>(),
+                        child: const CourierEarningsScreen(),
+                      ),
                 ),
               );
             },

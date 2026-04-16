@@ -31,23 +31,14 @@ class CustomerDeliveryChatScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         titleSpacing: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: typography.bodyLarge.copyWith(
-                fontWeight: FontWeight.w700,
-                color: colors.primaryTint2,
-              ),
-            ),
-            Text(
-              'Çevrimiçi',
-              style: typography.bodySmall.copyWith(color: colors.gray4),
-            ),
-          ],
+        title: Text(
+          title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: typography.bodyLarge.copyWith(
+            fontWeight: FontWeight.w700,
+            color: colors.primaryTint2,
+          ),
         ),
       ),
       body: Padding(
