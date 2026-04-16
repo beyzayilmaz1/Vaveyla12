@@ -6,6 +6,7 @@ import 'package:flutter_sweet_shop_app_ui/core/theme/typography.dart';
 import 'package:flutter_sweet_shop_app_ui/core/widgets/app_scaffold.dart';
 import 'package:flutter_sweet_shop_app_ui/core/widgets/general_app_bar.dart';
 import 'package:flutter_sweet_shop_app_ui/features/admin_feature/data/services/admin_coupon_service.dart';
+import 'package:flutter_sweet_shop_app_ui/features/admin_feature/presentation/widgets/admin_list_card.dart';
 
 /// Admin panelinde atanmış kuponları listeler. "Kullanıldı" etiketi ile gösterir.
 class AdminCouponsListScreen extends StatefulWidget {
@@ -90,54 +91,64 @@ class _CouponAssignmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.only(bottom: Dimens.padding),
-      child: Padding(
-        padding: EdgeInsets.all(Dimens.largePadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  assignment.code,
-                  style: appTypography.titleMedium.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: appColors.primary,
-                  ),
+    return AdminListCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(Dimens.padding),
+                decoration: BoxDecoration(
+                  color: appColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                _StatusBadge(
-                  assignment: assignment,
-                  appColors: appColors,
-                  appTypography: appTypography,
+                child: Icon(
+                  Icons.card_giftcard_outlined,
+                  color: appColors.primary,
+                  size: 22,
                 ),
-              ],
-            ),
-            SizedBox(height: Dimens.smallPadding),
-            Text(
-              'Müşteri: ${assignment.userFullName ?? assignment.userEmail ?? "-"}',
-              style: appTypography.bodyMedium.copyWith(color: appColors.gray4),
-            ),
-            Text(
-              assignment.discountType == 1
-                  ? '%${assignment.discountValue.toInt()} indirim'
-                  : '${assignment.discountValue.toInt()} ₺ indirim',
-              style: appTypography.bodySmall.copyWith(color: appColors.gray4),
-            ),
-            if (assignment.isUsed && assignment.usedAtUtc != null)
-              Padding(
-                padding: EdgeInsets.only(top: Dimens.smallPadding),
+              ),
+              const SizedBox(width: Dimens.padding),
+              Expanded(
                 child: Text(
-                  'Kullanım: ${_formatDate(assignment.usedAtUtc!)}',
-                  style: appTypography.bodySmall.copyWith(
-                    color: appColors.gray4,
-                    fontStyle: FontStyle.italic,
+                  assignment.code,
+                  style: appTypography.titleSmall.copyWith(
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
-          ],
-        ),
+              _StatusBadge(
+                assignment: assignment,
+                appColors: appColors,
+                appTypography: appTypography,
+              ),
+            ],
+          ),
+          SizedBox(height: Dimens.padding),
+          Text(
+            'Müşteri: ${assignment.userFullName ?? assignment.userEmail ?? "-"}',
+            style: appTypography.bodyMedium.copyWith(color: appColors.gray4),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            assignment.discountType == 1
+                ? '%${assignment.discountValue.toInt()} indirim'
+                : '${assignment.discountValue.toInt()} ₺ indirim',
+            style: appTypography.bodySmall.copyWith(color: appColors.gray4),
+          ),
+          if (assignment.isUsed && assignment.usedAtUtc != null)
+            Padding(
+              padding: EdgeInsets.only(top: Dimens.smallPadding),
+              child: Text(
+                'Kullanım: ${_formatDate(assignment.usedAtUtc!)}',
+                style: appTypography.bodySmall.copyWith(
+                  color: appColors.gray4,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

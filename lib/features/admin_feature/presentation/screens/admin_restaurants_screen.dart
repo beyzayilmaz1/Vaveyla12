@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sweet_shop_app_ui/core/theme/dimens.dart';
+import 'package:flutter_sweet_shop_app_ui/core/theme/theme.dart';
 import 'package:flutter_sweet_shop_app_ui/core/widgets/app_scaffold.dart';
 import 'package:flutter_sweet_shop_app_ui/core/widgets/general_app_bar.dart';
 import 'package:flutter_sweet_shop_app_ui/features/admin_feature/data/services/admin_service.dart';
+import 'package:flutter_sweet_shop_app_ui/features/admin_feature/presentation/widgets/admin_list_card.dart';
 
 class AdminRestaurantsScreen extends StatefulWidget {
   const AdminRestaurantsScreen({super.key});
@@ -39,6 +41,9 @@ class _AdminRestaurantsScreenState extends State<AdminRestaurantsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.theme.appColors;
+    final typography = context.theme.appTypography;
+
     return AppScaffold(
       appBar: GeneralAppBar(title: 'Restoran Yönetimi'),
       body: _loading
@@ -55,22 +60,52 @@ class _AdminRestaurantsScreenState extends State<AdminRestaurantsScreen> {
                   final isEnabled = r['isEnabled'] == true;
                   final commissionRate =
                       (r['commissionRate'] ?? 0.10) as num;
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: Dimens.largePadding),
-                    child: ListTile(
-                      title: Text(name),
-                      subtitle: Text(
-                        'Komisyon: %${(commissionRate * 100).toStringAsFixed(1)}',
-                      ),
-                      trailing: Switch(
-                        value: isEnabled,
-                        onChanged: (_) async {
-                          try {
-                            await _adminService.toggleRestaurantStatus(id);
-                            if (mounted) _load();
-                          } catch (_) {}
-                        },
-                      ),
+                  return AdminListCard(
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(Dimens.padding),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.storefront_outlined,
+                            color: colors.primary,
+                            size: 26,
+                          ),
+                        ),
+                        const SizedBox(width: Dimens.largePadding),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name,
+                                style: typography.titleSmall.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Komisyon %${(commissionRate * 100).toStringAsFixed(1)} · ${isEnabled ? 'Açık' : 'Kapalı'}',
+                                style: typography.bodySmall.copyWith(
+                                  color: colors.gray4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: isEnabled,
+                          onChanged: (_) async {
+                            try {
+                              await _adminService.toggleRestaurantStatus(id);
+                              if (mounted) _load();
+                            } catch (_) {}
+                          },
+                        ),
+                      ],
                     ),
                   );
                 },

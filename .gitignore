@@ -52,3 +52,6 @@ backend/**/build-temp*/
 backend/**/obj-temp*/
 *.user
 *.suo
+
+# SQL Server yedek dosyalari (paylasim icin zip; repoya eklemeyin)
+database/*.bak

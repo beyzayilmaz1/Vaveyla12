@@ -20,11 +20,14 @@ class ModernOrderCard extends StatelessWidget {
     this.actionButton,
     this.statusOnBottomRight = false,
     this.dateTimeTopSpacing = 6.0,
+    this.detailLine,
   });
 
   final String productName;
   final int price; // Price in cents/kuruş
   final String imageUrl;
+  /// İndirim, platform payı vb. ikinci bilgi satırı (sipariş özeti).
+  final String? detailLine;
   final String? dateTime; // Formatted date string like "01.03.2026 • 11:53"
   final String? status;
   final Color? statusColor;
@@ -104,6 +107,20 @@ class ModernOrderCard extends StatelessWidget {
                       ),
                     ],
                   ),
+
+                  if (detailLine != null && detailLine!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      detailLine!,
+                      style: typography.bodySmall.copyWith(
+                        color: colors.gray4,
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                   
                   // Middle Row - Date/Time + Quantity (if available)
                   if (dateTime != null || quantity != null) ...[

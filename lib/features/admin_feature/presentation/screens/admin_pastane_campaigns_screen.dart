@@ -8,6 +8,7 @@ import 'package:flutter_sweet_shop_app_ui/core/widgets/app_scaffold.dart';
 import 'package:flutter_sweet_shop_app_ui/core/widgets/general_app_bar.dart';
 import 'package:flutter_sweet_shop_app_ui/features/admin_feature/data/services/admin_restaurant_discount_service.dart';
 import 'package:flutter_sweet_shop_app_ui/features/admin_feature/data/services/admin_service.dart';
+import 'package:flutter_sweet_shop_app_ui/features/admin_feature/presentation/widgets/admin_list_card.dart';
 
 class AdminPastaneCampaignsScreen extends StatefulWidget {
   const AdminPastaneCampaignsScreen({super.key});
@@ -98,8 +99,25 @@ class _AdminPastaneCampaignsScreenState extends State<AdminPastaneCampaignsScree
         return context.theme.appColors.gray4;
       case 'Rejected':
         return context.theme.appColors.error;
+      case 'Pending':
+        return context.theme.appColors.warning;
       default:
-        return Colors.orange;
+        return context.theme.appColors.warning;
+    }
+  }
+
+  String _statusLabel(String status) {
+    switch (status) {
+      case 'Active':
+        return 'Aktif';
+      case 'Pasif':
+        return 'Pasif';
+      case 'Rejected':
+        return 'Reddedildi';
+      case 'Pending':
+        return 'Onay bekliyor';
+      default:
+        return status;
     }
   }
 
@@ -284,69 +302,119 @@ class _AdminPastaneCampaignsScreenState extends State<AdminPastaneCampaignsScree
           final c = _campaigns[index] as Map<String, dynamic>;
           final status = c['status']?.toString() ?? 'Pending';
           final campaignId = c['campaignId']?.toString() ?? '';
-          return Card(
-            margin: const EdgeInsets.only(bottom: Dimens.largePadding),
-            child: Padding(
-              padding: const EdgeInsets.all(Dimens.largePadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          final name = c['name']?.toString() ?? 'Kampanya';
+          final discType = c['discountType'];
+          final isPercent = discType == 1 || discType == '1';
+          final discVal = c['discountValue'];
+          final discountLine = isPercent
+              ? '%$discVal indirim'
+              : '$discVal ₺ indirim';
+
+          return AdminListCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(Dimens.padding),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.campaign_outlined,
+                        color: colors.primary,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: Dimens.padding),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: typography.titleSmall.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            discountLine,
+                            style: typography.titleMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _statusColor(status).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        _statusLabel(status),
+                        style: typography.labelSmall.copyWith(
+                          color: _statusColor(status),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: Dimens.padding),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.storefront_outlined,
+                      size: 18,
+                      color: colors.gray4,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        _restaurantDisplay(c),
+                        style: typography.bodySmall.copyWith(
+                          color: colors.gray4,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (status == 'Pending') ...[
+                  const SizedBox(height: Dimens.largePadding),
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          c['name']?.toString() ?? '',
-                          style: typography.titleSmall,
+                        child: FilledButton(
+                          onPressed: () => _approveCampaign(campaignId),
+                          child: const Text('Onayla'),
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: Dimens.padding,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _statusColor(status).withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          status,
-                          style: typography.labelSmall.copyWith(
-                            color: _statusColor(status),
+                      const SizedBox(width: Dimens.padding),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => _rejectCampaign(campaignId),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: colors.error,
+                            side: BorderSide(color: colors.error.withValues(alpha: 0.5)),
                           ),
+                          child: const Text('Reddet'),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: Dimens.padding),
-                  Text(
-                    '${c['discountValue']} ${c['discountType'] == 1 ? '%' : '₺'} indirim',
-                    style: typography.bodyMedium,
-                  ),
-                  const SizedBox(height: Dimens.smallPadding),
-                  Text(
-                    _restaurantDisplay(c),
-                    style: typography.bodySmall.copyWith(color: colors.gray4),
-                  ),
-                  if (status == 'Pending') ...[
-                    const SizedBox(height: Dimens.padding),
-                    Row(
-                      children: [
-                        TextButton(
-                          onPressed: () => _approveCampaign(campaignId),
-                          child: const Text('Onayla'),
-                        ),
-                        TextButton(
-                          onPressed: () => _rejectCampaign(campaignId),
-                          child: Text(
-                            'Reddet',
-                            style: TextStyle(color: colors.error),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ],
-              ),
+              ],
             ),
           );
         },
@@ -371,33 +439,90 @@ class _AdminPastaneCampaignsScreenState extends State<AdminPastaneCampaignsScree
         itemCount: _pendingItems.length,
         itemBuilder: (context, i) {
           final item = _pendingItems[i];
-          return Card(
-            margin: const EdgeInsets.only(bottom: Dimens.padding),
-            child: ListTile(
-              title: Text(
-                item.name,
-                style: typography.titleSmall.copyWith(
-                  fontWeight: FontWeight.w600,
+          return AdminListCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(Dimens.padding),
+                      decoration: BoxDecoration(
+                        color: colors.warning.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.hourglass_top_rounded,
+                        color: colors.warning,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: Dimens.padding),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: typography.titleSmall.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.primary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '%${item.restaurantDiscountPercent.toInt()} indirim',
+                              style: typography.labelMedium.copyWith(
+                                color: colors.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              subtitle: Text(
-                '%${item.restaurantDiscountPercent.toInt()} indirim',
-                style: typography.bodySmall.copyWith(color: colors.primary),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextButton(
-                    onPressed: () => _rejectRestaurantDiscount(item.restaurantId),
-                    child: Text('Reddet',
-                        style: TextStyle(color: colors.error)),
-                  ),
-                  FilledButton(
-                    onPressed: () => _approveRestaurantDiscount(item),
-                    child: const Text('Onayla'),
-                  ),
-                ],
-              ),
+                const SizedBox(height: Dimens.largePadding),
+                Text(
+                  'Onayınızı bekliyor',
+                  style: typography.bodySmall.copyWith(color: colors.gray4),
+                ),
+                const SizedBox(height: Dimens.padding),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () => _approveRestaurantDiscount(item),
+                        child: const Text('Onayla'),
+                      ),
+                    ),
+                    const SizedBox(width: Dimens.padding),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () =>
+                            _rejectRestaurantDiscount(item.restaurantId),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: colors.error,
+                          side: BorderSide(
+                            color: colors.error.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: const Text('Reddet'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           );
         },
@@ -422,27 +547,85 @@ class _AdminPastaneCampaignsScreenState extends State<AdminPastaneCampaignsScree
         itemCount: _approvedItems.length,
         itemBuilder: (context, i) {
           final item = _approvedItems[i];
-          return Card(
-            margin: const EdgeInsets.only(bottom: Dimens.padding),
-            child: ListTile(
-              title: Text(
-                item.name,
-                style: typography.titleSmall.copyWith(
-                  fontWeight: FontWeight.w600,
+          final active = item.restaurantDiscountIsActive;
+          return AdminListCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(Dimens.padding),
+                      decoration: BoxDecoration(
+                        color: (active ? colors.success : colors.gray4)
+                            .withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.verified_outlined,
+                        color: active ? colors.success : colors.gray4,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: Dimens.padding),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: typography.titleSmall.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: Dimens.padding,
+                            runSpacing: 6,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                '%${item.restaurantDiscountPercent.toInt()} indirim',
+                                style: typography.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: (active ? colors.success : colors.gray4)
+                                      .withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  active ? 'Aktif' : 'Pasif',
+                                  style: typography.labelSmall.copyWith(
+                                    color:
+                                        active ? colors.success : colors.gray4,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              subtitle: Text(
-                '%${item.restaurantDiscountPercent.toInt()} indirim • ${item.restaurantDiscountIsActive ? 'Aktif' : 'Pasif'}',
-                style: typography.bodySmall.copyWith(
-                  color: item.restaurantDiscountIsActive
-                      ? colors.primary
-                      : colors.gray4,
+                const SizedBox(height: Dimens.largePadding),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonal(
+                    onPressed: () => _editApprovedRestaurantDiscount(item),
+                    child: const Text('Oranı düzelt'),
+                  ),
                 ),
-              ),
-              trailing: FilledButton.tonal(
-                onPressed: () => _editApprovedRestaurantDiscount(item),
-                child: const Text('Düzelt'),
-              ),
+              ],
             ),
           );
         },
