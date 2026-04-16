@@ -32,6 +32,7 @@ public sealed class VaveylaDbContext : DbContext
     public DbSet<CourierOrderRefusal> CourierOrderRefusals => Set<CourierOrderRefusal>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<UserDeviceToken> UserDeviceTokens => Set<UserDeviceToken>();
+    public DbSet<HomeMarketingBanner> HomeMarketingBanners => Set<HomeMarketingBanner>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -429,5 +430,27 @@ public sealed class VaveylaDbContext : DbContext
             .IsRequired();
         courierRefusal.HasIndex(x => new { x.OrderId, x.CourierUserId }).IsUnique();
         courierRefusal.HasIndex(x => x.CourierUserId);
+
+        var marketingBanner = modelBuilder.Entity<HomeMarketingBanner>();
+        marketingBanner.ToTable("HomeMarketingBanners");
+        marketingBanner.HasKey(x => x.BannerId);
+        marketingBanner.Property(x => x.ImageUrl).HasMaxLength(2048).IsRequired();
+        marketingBanner.Property(x => x.Title).HasMaxLength(200);
+        marketingBanner.Property(x => x.Subtitle).HasMaxLength(300);
+        marketingBanner.Property(x => x.BadgeText).HasMaxLength(80);
+        marketingBanner.Property(x => x.BodyText).HasMaxLength(2000);
+        marketingBanner.Property(x => x.SortOrder).HasDefaultValue(0).IsRequired();
+        marketingBanner.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
+        marketingBanner.Property(x => x.ActionType)
+            .HasConversion<byte>()
+            .IsRequired();
+        marketingBanner.Property(x => x.ActionTarget).HasMaxLength(2048);
+        marketingBanner.Property(x => x.CreatedAtUtc)
+            .HasDefaultValueSql("SYSUTCDATETIME()")
+            .IsRequired();
+        marketingBanner.Property(x => x.UpdatedAtUtc)
+            .HasDefaultValueSql("SYSUTCDATETIME()")
+            .IsRequired();
+        marketingBanner.HasIndex(x => new { x.IsActive, x.SortOrder });
     }
 }

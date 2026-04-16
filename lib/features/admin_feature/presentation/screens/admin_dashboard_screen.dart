@@ -8,6 +8,7 @@ import 'package:flutter_sweet_shop_app_ui/core/widgets/app_scaffold.dart';
 import 'package:flutter_sweet_shop_app_ui/core/widgets/general_app_bar.dart';
 import 'package:flutter_sweet_shop_app_ui/features/admin_feature/presentation/screens/admin_assign_coupon_screen.dart';
 import 'package:flutter_sweet_shop_app_ui/features/admin_feature/presentation/screens/admin_coupons_list_screen.dart';
+import 'package:flutter_sweet_shop_app_ui/features/admin_feature/presentation/screens/admin_marketing_banners_screen.dart';
 import 'package:flutter_sweet_shop_app_ui/features/admin_feature/presentation/screens/admin_orders_screen.dart';
 import 'package:flutter_sweet_shop_app_ui/features/admin_feature/presentation/screens/admin_pastane_campaigns_screen.dart';
 import 'package:flutter_sweet_shop_app_ui/features/admin_feature/presentation/screens/admin_restaurants_screen.dart';
@@ -71,6 +72,13 @@ class AdminDashboardScreen extends StatelessWidget {
             title: 'Pastane Kampanya Yönetimi',
             subtitle: 'Kampanyalar ve restoran indirimi onayı',
             onTap: () => appPush(context, const AdminPastaneCampaignsScreen()),
+          ),
+          const SizedBox(height: Dimens.largePadding),
+          _MenuCard(
+            icon: Icons.image_outlined,
+            title: 'Özel teklif bannerları',
+            subtitle: 'Ana sayfa kaydırıcı (görsel, metin, yönlendirme)',
+            onTap: () => appPush(context, const AdminMarketingBannersScreen()),
           ),
           const SizedBox(height: Dimens.largePadding),
           _MenuCard(
